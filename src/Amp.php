@@ -36,7 +36,7 @@ class Amp implements EventInterface
             case EventInterface::EV_TIMER:
             case EventInterface::EV_TIMER_ONCE:
                 $param = [$func, (array)$args, $flag, self::$_timerId];
-                $event = Loop::repeat($fd, \Closure::bind(function () use ($param) {
+                $event = Loop::repeat($fd * 1000, \Closure::bind(function () use ($param) {
                     $timer_id = $param[3];
                     if ($param[2] === self::EV_TIMER_ONCE) {
                         Loop::cancel($this->_eventTimer[$timer_id]);
