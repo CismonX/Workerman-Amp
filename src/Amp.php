@@ -11,11 +11,11 @@ class Amp implements EventInterface {
     protected static $_timerId = 1;
 
     public function add($fd, $flag, $func, $args = []) {
-        $args = (array)$args;
         switch ($flag) {
             case self::EV_READ:
                 $fd_key = intval($fd);
                 $event = Loop::onReadable($fd, function ($id, $socket) use ($func) {
+                    //In Workerman the first parameter should be socket stream.
                     $func($socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
@@ -23,6 +23,7 @@ class Amp implements EventInterface {
             case self::EV_WRITE:
                 $fd_key = intval($fd);
                 $event = Loop::onWritable($fd, function ($id, $socket) use ($func) {
+                    //In Workerman the first parameter should be socket stream.
                     $func($socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
@@ -30,6 +31,7 @@ class Amp implements EventInterface {
             case self::EV_SIGNAL:
                 $fd_key = intval($fd);
                 $event = Loop::onSignal($fd, function ($id, $signal) use ($func) {
+                    //In Workerman the first parameter should be signal.
                     $func($signal);
                 });
                 $this->_eventSignal[$fd_key] = $event;
@@ -40,6 +42,7 @@ class Amp implements EventInterface {
                 $event = Loop::repeat($fd * 1000, \Closure::bind(function () use ($param) {
                     $timer_id = $param[3];
                     if ($param[2] === self::EV_TIMER_ONCE) {
+                        //Loop::delay() can also do the trick.
                         Loop::cancel($this->_eventTimer[$timer_id]);
                         unset($this->_eventTimer[$timer_id]);
                     }
