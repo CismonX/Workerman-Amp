@@ -10,13 +10,13 @@ class Amp implements EventInterface {
     protected $_eventTimer = [];
     protected static $_timerId = 1;
 
-    public function add($fd, $flag, $func, $args = []) {
+    public function add($fd, $flag, $func, $args = null) {
         switch ($flag) {
             case self::EV_READ:
                 $fd_key = intval($fd);
                 $event = Loop::onReadable($fd, function ($id, $socket) use ($func) {
                     //In Workerman the first parameter should be socket stream.
-                    $func($socket);
+                    return $func($socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
                 return true;
@@ -24,7 +24,7 @@ class Amp implements EventInterface {
                 $fd_key = intval($fd);
                 $event = Loop::onWritable($fd, function ($id, $socket) use ($func) {
                     //In Workerman the first parameter should be socket stream.
-                    $func($socket);
+                    return $func($socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
                 return true;
@@ -32,7 +32,7 @@ class Amp implements EventInterface {
                 $fd_key = intval($fd);
                 $event = Loop::onSignal($fd, function ($id, $signal) use ($func) {
                     //In Workerman the first parameter should be signal.
-                    $func($signal);
+                    return $func($signal);
                 });
                 $this->_eventSignal[$fd_key] = $event;
                 return true;
@@ -47,7 +47,7 @@ class Amp implements EventInterface {
                         unset($this->_eventTimer[$timer_id]);
                     }
                     try {
-                        call_user_func_array($param[0], $param[1]);
+                        return call_user_func_array($param[0], $param[1]);
                     } catch (\Exception $e) {
                         Worker::log($e);
                         exit(250);
