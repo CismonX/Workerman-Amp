@@ -1,6 +1,6 @@
 <?php
 namespace Workerman\Events;
-use Amp\Loop;
+use Amp\ {function asyncCall, Loop};
 use Workerman\Worker;
 
 class Amp implements EventInterface {
@@ -16,7 +16,7 @@ class Amp implements EventInterface {
                 $fd_key = intval($fd);
                 $event = Loop::onReadable($fd, function ($id, $socket) use ($func) {
                     //In Workerman the first parameter should be socket stream.
-                    return $func($socket);
+                    asyncCall($func, $socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
                 return true;
@@ -24,7 +24,7 @@ class Amp implements EventInterface {
                 $fd_key = intval($fd);
                 $event = Loop::onWritable($fd, function ($id, $socket) use ($func) {
                     //In Workerman the first parameter should be socket stream.
-                    return $func($socket);
+                    asyncCall($func, $socket);
                 });
                 $this->_allEvents[$fd_key][$flag] = $event;
                 return true;
@@ -32,7 +32,7 @@ class Amp implements EventInterface {
                 $fd_key = intval($fd);
                 $event = Loop::onSignal($fd, function ($id, $signal) use ($func) {
                     //In Workerman the first parameter should be signal.
-                    return $func($signal);
+                    asyncCall($func, $signal);
                 });
                 $this->_eventSignal[$fd_key] = $event;
                 return true;
@@ -47,7 +47,7 @@ class Amp implements EventInterface {
                         unset($this->_eventTimer[$timer_id]);
                     }
                     try {
-                        return call_user_func_array($param[0], $param[1]);
+                        asyncCall($param[0], ...$param[1]);
                     } catch (\Exception $e) {
                         Worker::log($e);
                         exit(250);

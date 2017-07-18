@@ -1,0 +1,123 @@
+Index: Connection/TcpConnection.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Connection/TcpConnection.php	(revision 212aa15bc0edc1226246de52a2fbece0db58414d)
++++ Connection/TcpConnection.php	(revision )
+@@ -401,7 +401,7 @@
+             }
+             if (isset($this->onSslHandshake)) {
+                 try {
+-                    call_user_func($this->onSslHandshake, $this);
++                    yield \Amp\call($this->onSslHandshake, $this);
+                 } catch (\Exception $e) {
+                     Worker::log($e);
+                     exit(250);
+@@ -477,7 +477,7 @@
+                 }
+                 try {
+                     // Decode request buffer before Emitting onMessage callback.
+-                    call_user_func($this->onMessage, $this, $parser::decode($one_request_buffer, $this));
++                    yield \Amp\call($this->onMessage, $this, $parser::decode($one_request_buffer, $this));
+                 } catch (\Exception $e) {
+                     Worker::log($e);
+                     exit(250);
+@@ -500,7 +500,7 @@
+             return;
+         }
+         try {
+-            call_user_func($this->onMessage, $this, $this->_recvBuffer);
++            yield \Amp\call($this->onMessage, $this, $this->_recvBuffer);
+         } catch (\Exception $e) {
+             Worker::log($e);
+             exit(250);
+@@ -526,7 +526,7 @@
+             // Try to emit onBufferDrain callback when the send buffer becomes empty. 
+             if ($this->onBufferDrain) {
+                 try {
+-                    call_user_func($this->onBufferDrain, $this);
++                    yield \Amp\call($this->onBufferDrain, $this);
+                 } catch (\Exception $e) {
+                     Worker::log($e);
+                     exit(250);
+Index: Connection/AsyncTcpConnection.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Connection/AsyncTcpConnection.php	(revision 212aa15bc0edc1226246de52a2fbece0db58414d)
++++ Connection/AsyncTcpConnection.php	(revision )
+@@ -292,7 +292,7 @@
+             // Try to emit onConnect callback.
+             if ($this->onConnect) {
+                 try {
+-                    call_user_func($this->onConnect, $this);
++                    yield \Amp\call($this->onConnect, $this);
+                 } catch (\Exception $e) {
+                     Worker::log($e);
+                     exit(250);
+@@ -304,7 +304,7 @@
+             // Try to emit protocol::onConnect
+             if (method_exists($this->protocol, 'onConnect')) {
+                 try {
+-                    call_user_func(array($this->protocol, 'onConnect'), $this);
++                    yield \Amp\call(array($this->protocol, 'onConnect'), $this);
+                 } catch (\Exception $e) {
+                     Worker::log($e);
+                     exit(250);
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .gitignore	(revision 212aa15bc0edc1226246de52a2fbece0db58414d)
++++ .gitignore	(revision )
+@@ -1,4 +1,5 @@
+ logs
++vendor
+ .buildpath
+ .project
+ .settings
+Index: composer.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- composer.json	(revision 212aa15bc0edc1226246de52a2fbece0db58414d)
++++ composer.json	(revision )
+@@ -24,7 +24,8 @@
+         "source": "https://github.com/walkor/workerman"
+     },
+     "require": {
+-        "php": ">=5.3"
++        "php": ">=7.0",
++        "amphp/amp": "^2.0@dev"
+     },
+     "suggest": {
+         "ext-event": "For better performance. "
+Index: Worker.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Worker.php	(revision 212aa15bc0edc1226246de52a2fbece0db58414d)
++++ Worker.php	(revision )
+@@ -1625,7 +1625,7 @@
+         // Try to emit onConnect callback.
+         if ($this->onConnect) {
+             try {
+-                call_user_func($this->onConnect, $connection);
++                yield \Amp\call($this->onConnect, $connection);
+             } catch (\Exception $e) {
+                 self::log($e);
+                 exit(250);
+@@ -1661,7 +1661,7 @@
+             }
+             ConnectionInterface::$statistics['total_request']++;
+             try {
+-                call_user_func($this->onMessage, $connection, $recv_buffer);
++                yield \Amp\call($this->onMessage, $connection, $recv_buffer);
+             } catch (\Exception $e) {
+                 self::log($e);
+                 exit(250);
