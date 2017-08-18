@@ -10,11 +10,13 @@
 
 ### 使用说明
 
-1. 将src目录下的Amp.php复制到Workerman\Events下，或者你可以选择使用其他方式加载。
+1. 使用composer将`Workerman\Events\Amp`加载到项目中。
 
-2. 将Amp加载到当前项目中。（建议使用composer管理依赖）
+```bash
+composer require cismonx/workerman-amp
+```
 
-3. 将Amp设置为Workerman所使用的event-loop。如下：
+2. 将Amp设置为Workerman所使用的event-loop。如下：
 
 ```php
 Worker::$eventLoopClass = '\\Workerman\\Events\\Amp';

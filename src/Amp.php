@@ -1,15 +1,38 @@
 <?php
+
 namespace Workerman\Events;
 use Amp\ {function asyncCall, Loop};
 use Workerman\Worker;
 
 class Amp implements EventInterface {
 
+    /**
+     * Socket onReadable/onWritable events.
+     * @var array
+     */
     protected $_allEvents = [];
+
+    /**
+     * Signals.
+     * @var array
+     */
     protected $_eventSignal = [];
+
+    /**
+     * Timers.
+     * @var array
+     */
     protected $_eventTimer = [];
+
+    /**
+     * Timer Id counter.
+     * @var int
+     */
     protected static $_timerId = 1;
 
+    /**
+     * {@inheritdoc}
+     */
     public function add($fd, $flag, $func, $args = null) {
         switch ($flag) {
             case self::EV_READ:
@@ -64,6 +87,9 @@ class Amp implements EventInterface {
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function del($fd, $flag) {
         switch ($flag) {
             case self::EV_READ:
@@ -94,18 +120,34 @@ class Amp implements EventInterface {
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function loop() {
         Loop::run();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function clearAllTimer() {
         foreach ($this->_eventTimer as $event)
             Loop::cancel($event);
         $this->_eventTimer = [];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function destroy() {
         foreach ($this->_eventSignal as $event)
             Loop::cancel($event);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTimerCount() {
+        return count($this->_eventTimer);
     }
 }

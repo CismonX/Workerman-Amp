@@ -1,0 +1,14 @@
+{
+  "name" : "cismonx/workerman-amp",
+  "description" : "Amp event loop for Workerman.",
+  "type" : "library",
+  "require" : {
+    "workerman/workerman": "^3.4",
+    "amphp/amp": "^2.0"
+  },
+  "autoload" : {
+    "psr-4" : {
+      "Workerman\\Events\\" : "src/"
+    }
+  }
+}
